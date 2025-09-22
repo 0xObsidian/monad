@@ -25,6 +25,8 @@
 
 #include <evmc/evmc.h>
 
+#include <cctype>
+#include <format>
 #include <limits>
 #include <set>
 #include <variant>
@@ -172,10 +174,16 @@ namespace monad::vm::utils::evm_as::internal
 
         bool check_label(std::string const &label)
         {
-            // TODO: check that the string contains only alphanums.
             if (label == "") {
                 error(pos, "Empty label");
                 return false;
+            }
+            for (char ch : label) {
+                unsigned char uch = static_cast<unsigned char>(ch);
+                if (!(std::isalnum(uch) || ch == '.' || ch == '_')) {
+                    error(pos, std::format("Invalid label '{}'", label));
+                    return false;
+                }
             }
             return true;
         }

@@ -457,6 +457,21 @@ TEST(EvmAs, UndefinedLabels)
     ASSERT_EQ(errors[0].msg, "Undefined label 'END'");
 }
 
+TEST(EvmAs, InvalidLabelChars)
+{
+    using namespace monad::vm::utils::evm_as;
+    auto eb = evm_as::latest();
+
+    eb.push("@bad").push("good_label").push("also.good").push("with-dash");
+    ASSERT_EQ(eb.size(), 4);
+
+    std::vector<evm_as::ValidationError> errors{};
+    ASSERT_FALSE(evm_as::validate(eb, errors));
+    ASSERT_GE(errors.size(), 1);
+    // The first error must be the invalid label format
+    ASSERT_EQ(errors[0].msg, "Invalid label '@bad'");
+}
+
 TEST(EvmAs, ComposeIdentity)
 {
     auto eb1 = evm_as::latest();
